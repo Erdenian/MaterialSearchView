@@ -558,13 +558,37 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
     }
 
     /**
-     * Close search view.
+     * Close search view. This will animate the closing of the view.
      */
     public void closeSearch() {
+        closeSearch(true);
+    }
+
+    /**
+     * Close Search View. If animate is true, Animate the closing of the view.
+     *
+     * @param animate true for animate
+     */
+    public void closeSearch(boolean animate) {
         if (!isSearchOpen()) {
             return;
         }
 
+        dismissSuggestions();
+        clearFocus();
+
+        if (animate) {
+            setInvisibleWithAnimation();
+        } else {
+            mSearchLayout.setVisibility(GONE);
+            if (mSearchViewListener != null) {
+                mSearchViewListener.onSearchViewClosed();
+            }
+        }
+        mIsSearchOpen = false;
+    }
+
+    private void setInvisibleWithAnimation() {
         AnimationUtil.AnimationListener animationListener = new AnimationUtil.AnimationListener() {
             @Override
             public boolean onAnimationStart(View view) {
@@ -574,7 +598,7 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
             @Override
             public boolean onAnimationEnd(View view) {
                 if (mSearchViewListener != null) {
-                    mSearchViewListener.onSearchViewShown();
+                    mSearchViewListener.onSearchViewClosed();
                 }
                 return false;
             }
@@ -590,17 +614,6 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
         } else {
             AnimationUtil.fadeOutView(mSearchLayout, mAnimationDuration, animationListener);
         }
-
-        //mSearchSrcTextView.setText(null);
-        dismissSuggestions();
-        clearFocus();
-
-        //mSearchLayout.setVisibility(GONE);
-        if (mSearchViewListener != null) {
-            mSearchViewListener.onSearchViewClosed();
-        }
-        mIsSearchOpen = false;
-
     }
 
     /**
